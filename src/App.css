@@ -1,0 +1,52 @@
+/* default create-react-app CSS code
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+ */
+/* Map CSS */
+
+#root,#rootDiv,.leaflet-container{
+  height: 100%;
+width: 100%;
+
+}
+
+body,html{
+  padding: 0;
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+ overflow:hidden;
+}
+
+ #over { 
+     position: absolute;
+    top: 100px;
+    left: 1%;
+    z-index: 401;
+     }
+
+      
+   
