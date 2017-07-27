@@ -26,6 +26,8 @@ class SearchAddress extends Component {
       return
     }
 
+    this.props.searchResults(res.features[0].geometry.coordinates.reverse(), res.features[0].properties.label)
+
     this.setState({
       address: res.features[0].properties.label,
       loading: false,
@@ -42,33 +44,35 @@ class SearchAddress extends Component {
     const options = {
       api_key: apikey,
       text: this.state.value
-
     }
+
     if (prevState.value === this.state.value) {
       return false
     }
 
-    const searchUrl = `${apiurl}?api_key=${options.api_key}&text=${options.text}`
     this.setState({loading: true})
 
+    const searchUrl = `${apiurl}?api_key=${options.api_key}&text=${options.text}`
     fetch(searchUrl).then(this.searchAddress)
+
     console.log('Component DID Update also fetched this url :', searchUrl)
   }
 
   render () {
-    /* Displays Loading */
+    /* displays Loading */
     let loading
+
     if (this.state.loading === true) {
       loading = <i>loading</i>
     }
 
     return (
+
       <div>
         <input type='text' value={this.state.value} onChange={this.handleKeyUp} placeholder='enter address' />
         <p><b>{loading}</b></p>
-        <p>{this.state.address}</p>
-
       </div>
+
     )
   }
 }

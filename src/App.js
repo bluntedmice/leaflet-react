@@ -17,7 +17,7 @@ class App extends Component {
       mapCenter: [40.645, -73.975]
     }
 
-    this.handlePointChange = this.handlePointChange.bind(this)
+    this.searchResults = this.searchResults.bind(this)
     this.markerDrag = this.markerDrag.bind(this)
     this.gotClick = this.gotClick.bind(this)
     this.hidePopup = this.hidePopup.bind(this)
@@ -82,29 +82,13 @@ class App extends Component {
 
 /* end on marker drag function */
 
-  handlePointChange (point) {
-    const displaySearchLabel = (res) => {
-      console.log(point)
-      const addressPoint = res.features[0].geometry.coordinates
-      const addressLabel = res.features[0].properties.label
-      this.setState({
-        addressName: addressLabel,
-        mapCenter: addressPoint,
-        markerLocation: addressPoint
-      })
-    }
-    function searchAddress (res, err) {
-      res.json().then(displaySearchLabel)
-    }
-
-    const options = {
-      api_key: apikey,
-      text: this.state.value
-
-    }
-
-    const searchUrl = `${apiurl}?api_key=${options.api_key}&text=${options.text}`
-    fetch(searchUrl).then(searchAddress)
+// p = point , l = label
+  searchResults (p, l) {
+    this.setState({
+      addressName: l,
+      mapCenter: p,
+      markerLocation: p
+    })
   }
 
   hidePopup (e) {
@@ -155,9 +139,10 @@ class App extends Component {
           {markers}
         </Map>
 
-        <div id='over'>
-          <SearchAddress handlePointChange={this.handlePointChange} />
+        <div id='input-box'>
+          <SearchAddress searchResults={this.searchResults} />
         </div>
+
       </div>
     )
   }
