@@ -1,7 +1,8 @@
+/* global fetch */
 import React, { Component } from 'react'
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet'
 import SearchAddress from './components/SearchAddress'
-import {apiurlReverse, apikey} from './config'
+import {apiurlReverse, apiurl, apikey} from './config'
 import './App.css'
 
 const OpenStreetMapTiles = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -17,20 +18,28 @@ class App extends Component {
     }
 
     this.handlePointChange = this.handlePointChange.bind(this)
-    this.markerChange = this.markerChange.bind(this)
+    this.markerDrag = this.markerDrag.bind(this)
     this.gotClick = this.gotClick.bind(this)
     this.hidePopup = this.hidePopup.bind(this)
   }
 
+/* click event function */
   gotClick (e) {
     const displayAddressData = (res) => {
-      var addressCoords = res.features[0].geometry.coordinates.reverse()
-      console.log(addressCoords)
+      const addressCoords = res.features[0].geometry.coordinates.reverse()
+      const addressLabel = res.features[0].properties.label
+
+      const position = {
+        latlng: addressCoords
+      }
+
       this.setState({
-        markerLocation: addressCoords
+        addressName: addressLabel,
+        markerLocation: position.latlng
       })
+
       this.map.leafletElement.panTo(addressCoords)
-      console.log('Click : ' + addressCoords)
+      console.log('Click Point Results : ', addressCoords, addressLabel)
     }
 
     function gotAddressData (res, err) {
@@ -43,31 +52,64 @@ class App extends Component {
     }
 
     const clickUrl = `${apiurlReverse}?api_key=${apikey}&point.lat=${options.lat}&point.lon=${options.lng}`
-    console.log(clickUrl)
     fetch(clickUrl).then(gotAddressData)
   }
 
+/* end click event function */
+
+/* on marker drag function */
+  markerDrag (e) {
+    const gotJson = (res) => {
+      const addressLabel = res.features[0].properties.label
+
+      this.setState({
+        addressName: addressLabel,
+        renderPopup: true,
+        markerLocation: targetCoords
+      })
+
+      console.log('Drag End Results : ', e.target.getLatLng(), res.features[0].properties.label)
+    }
+
+    function gotAddress (res, err) {
+      res.json().then(gotJson)
+    }
+
+    const targetCoords = e.target.getLatLng()
+    const dragEndUrl = `${apiurlReverse}?api_key=${apikey}&point.lat=${targetCoords.lat}&point.lon=${targetCoords.lng}`
+    fetch(dragEndUrl).then(gotAddress)
+  }
+
+/* end on marker drag function */
+
   handlePointChange (point) {
-    this.setState({
-      mapCenter: point,
-      markerLocation: point
-    })
+    const displaySearchLabel = (res) => {
+      console.log(point)
+      const addressPoint = res.features[0].geometry.coordinates
+      const addressLabel = res.features[0].properties.label
+      this.setState({
+        addressName: addressLabel,
+        mapCenter: addressPoint,
+        markerLocation: addressPoint
+      })
+    }
+    function searchAddress (res, err) {
+      res.json().then(displaySearchLabel)
+    }
+
+    const options = {
+      api_key: apikey,
+      text: this.state.value
+
+    }
+
+    const searchUrl = `${apiurl}?api_key=${options.api_key}&text=${options.text}`
+    fetch(searchUrl).then(searchAddress)
   }
 
-  markerChange (event) {
-    this.setState({
-      renderPopup: true,
-      markerLocation: event.target.getLatLng()
-    })
-
-    console.log(event.target.getLatLng())
-  }
-
-  hidePopup (event) {
-    console.log('test')
+  hidePopup (e) {
     this.setState({
       renderPopup: false
-
     })
   }
 
@@ -75,7 +117,7 @@ class App extends Component {
     const markers = this.state.markerLocation ? (
       <Marker
         position={this.state.markerLocation}
-        onDragEnd={this.markerChange}
+        onDragEnd={this.markerDrag}
         onDragStart={this.hidePopup}
         draggable
       />
@@ -83,11 +125,14 @@ class App extends Component {
 
     let popup = this.state.markerLocation ? (
       <Popup
-        position={this.state.addressName}
+        position={this.state.markerLocation}
+        maxWidth={300}
         closeOnClick={false}
         closeButton={false}
         offset={[0, -25]}
-      ><h1>test this</h1></Popup>
+      >
+        <span>{this.state.addressName}</span>
+      </Popup>
     ) : null
 
     if (this.state.renderPopup === false) {

@@ -26,8 +26,6 @@ class SearchAddress extends Component {
       return
     }
 
-    this.props.handlePointChange(res.features[0].geometry.coordinates.reverse())
-
     this.setState({
       address: res.features[0].properties.label,
       loading: false,
